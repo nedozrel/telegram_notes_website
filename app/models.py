@@ -28,7 +28,7 @@ class Profile(models.Model):
 class Note(models.Model):
 	text = models.TextField(blank=True)
 	note_getter = models.ForeignKey(Profile, on_delete=models.CASCADE)
-	creator = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='creator')
+	creator = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='notes')
 	updated = models.DateTimeField(auto_now=True)
 	created = models.DateTimeField(auto_now_add=True)
 

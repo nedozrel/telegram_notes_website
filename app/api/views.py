@@ -1,7 +1,8 @@
+from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from app.models import Note, Profile, TelegramPhoto
-from .serializers import NoteSerializer, ProfileSerializer
+from .serializers import NoteSerializer, ProfileSerializer, ProfileNotesSerializer
 
 
 @api_view(['POST'])
@@ -45,38 +46,32 @@ def create_note(request):
 				'telegram_id': data.get('note_getter').get('telegram_id'),
 			}
 		)
-		note_sender_photo, _ = TelegramPhoto.objects.get_or_create(
-			photo_id=data.get('note_sender').get('photo')
+		note_creator_photo, _ = TelegramPhoto.objects.get_or_create(
+			photo_id=data.get('note_creator').get('photo')
 		)
-		note_sender_profile, _ = Profile.objects.update_or_create(
-			first_name=data.get('note_sender').get('first_name'),
-			last_name=data.get('note_sender').get('last_name'),
-			username=data.get('note_sender').get('username'),
-			phone=data.get('note_sender').get('phone'),
-			photo=note_getter_photo,
+		note_creator_profile, _ = Profile.objects.update_or_create(
+			first_name=data.get('note_creator').get('first_name'),
+			last_name=data.get('note_creator').get('last_name'),
+			username=data.get('note_creator').get('username'),
+			phone=data.get('note_creator').get('phone'),
+			photo=note_creator_photo,
 			defaults={
-				'telegram_id': data.get('note_sender').get('telegram_id'),
+				'telegram_id': data.get('note_creator').get('telegram_id'),
 			}
 		)
-		Note(
+		note = Note(
 			text=data.get('text'),
 			note_getter=note_getter_profile,
-			creator=note_sender_profile
+			creator=note_creator_profile
 		)
+		note.save()
 		return Response({'result': 'success'})
 	except:
 		return Response({'result': 'Something went wrong :('})
 
 
 @api_view(['GET'])
-def get_notes(request):
-	notes = Note.objects.all()
-	serializer = NoteSerializer(notes, many=True)
-	return Response(serializer.data)
-
-
-@api_view(['GET'])
-def get_note(request, pk):
-	note = Note.objects.get(id=pk)
-	serializer = NoteSerializer(note)
+def get_notes(request, creator_tg_id):
+	note_creator = Profile.objects.get(telegram_id=creator_tg_id)
+	serializer = ProfileNotesSerializer(note_creator)
 	return Response(serializer.data)
