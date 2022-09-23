@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Note, User
+from .models import Note, TelegramPhoto, Profile
 
-admin.site.register(User)
+admin.site.register(Profile)
+admin.site.register(TelegramPhoto)
 admin.site.register(Note)
