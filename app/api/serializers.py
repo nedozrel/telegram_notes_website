@@ -35,7 +35,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Note
-		fields = ('text', 'note_getter',)
+		fields = ('text', 'note_getter', 'creator')
 
 	def create(self, validated_data):
 		note_creator_data = validated_data.pop('creator')
