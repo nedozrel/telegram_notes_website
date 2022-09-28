@@ -29,13 +29,19 @@ class ProfileSerializer(serializers.ModelSerializer):
 		return profile
 
 
-class NoteSerializer(serializers.ModelSerializer):
+class BaseNoteSz(serializers.ModelSerializer):
+	class Meta:
+		model = Note
+		fields = ('id', 'text', 'created')
+
+
+class NoteSerializer(BaseNoteSz):
 	note_getter = ProfileSerializer()
 	creator = ProfileSerializer()
 
 	class Meta:
 		model = Note
-		fields = ('text', 'note_getter', 'creator')
+		fields = ('note_getter', 'creator')
 
 	def create(self, validated_data):
 		note_creator_data = validated_data.pop('creator')
@@ -57,10 +63,23 @@ class NoteSerializer(serializers.ModelSerializer):
 		return note
 
 
+class NotesCreatedByUserSz(serializers.ModelSerializer):
+	note_getter = ProfileSerializer()
+
+	class Meta:
+		model = Note
+		fields = ('id', 'text', 'created', 'note_getter')
+
+
 class ProfileNotesSerializer(serializers.ModelSerializer):
-	created_notes = NoteSerializer(many=True)
-	# received_notes = NoteSerializer(many=True)
+	created_notes = NotesCreatedByUserSz(many=True)
 
 	class Meta:
 		model = Profile
 		fields = ('created_notes', )
+
+
+class FromUserToUserNotesSz(serializers.Serializer):
+	creator = ProfileSerializer()
+	note_getter = ProfileSerializer()
+	notes = BaseNoteSz(many=True)
